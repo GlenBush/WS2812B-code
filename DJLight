@@ -1,0 +1,133 @@
+#include <Adafruit_NeoPixel.h>
+
+
+#define PIN 6
+    int Num_Leds = 20;// <---------------- Enter the number of LEDs here. I wrote this for NEOPIXEL 2811B, 
+      int numReadings = 3;
+      int total = 0;
+      int finreadings = 0;
+      int average =0;
+      int curread =0;
+      int count;
+
+
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(Num_Leds, PIN, NEO_GRB + NEO_KHZ800);
+
+
+
+
+
+
+
+void setup() {
+
+     analogReference(INTERNAL);  // <----------- Uncomment for low level input.
+          Serial.begin(9600);
+          strip.begin();
+          strip.show();
+
+}
+void loop() {  
+
+  
+
+  while (count < 5){
+           
+            
+
+  constrain (curread, 0, 1000);
+  constrain (average, 0, 1000);
+  
+  
+    if (finreadings < (numReadings)) {
+      
+      curread = analogRead(A0);
+      total = (total + curread);
+      finreadings = (finreadings + 1);
+      }
+    else 
+      {
+      average = (total / numReadings); 
+           finreadings = 0;
+           total = 0;
+       }
+delay (1);
+count = count + 1 ;
+  }
+
+
+        //Serial.println (total);
+        //Serial.println (finreadings);
+
+
+    int min = 0;// <------- ------------- This is a default value will be changed by math later
+    int max = average;// <--------------- This is a default value will be changed by math later
+    int red = 0;// <--------------------- This will latter be populated with math
+    int blue = 0;// <-------------------- This will latter be populated with math
+    int green = 0;// <------------------- This will latter be populated with math
+    int brightness = 0;// <-------------- This will latter be populated with math
+    int Pixel_Count = 0;// <------------- for the Led wite loop.
+    
+      
+      //if (brightness < max / 2) {     // <------------------ This is an attempt at a self adjusting brightness leveler.
+      // int times = max;               // <------------------ Works well but i am looking into something else.
+      //max = (average * .75 + times);  // <------------------
+      // }                              // <------------------
+      // else if (max >1000){           // <------------------
+      // max = 1000;                    // <------------------
+      //}                               // <------------------ End of self adjusting brightness leveler.
+       
+   
+   
+   
+     
+     brightness = (average);
+     // <------- This is important to make sure you do not over push your LEDs
+     map(brightness, min, max, 0, 255);// <--------------- You should leave this here.
+     
+     
+
+     
+     
+     
+     if (brightness > 190 ){ // <---------- no half way flashing, if the input is higher than average FULL BRIGHT 
+          red = 255;
+          green = 0 ;
+          blue = 0;
+     }
+       else if  (150 > brightness && brightness > 100 ){ // <--------------- never go off all the way some light in beteen beats.
+          green =40;
+          red = 30;
+          blue =20;
+     }
+       if (brightness < 100 ) {   // <--------------------song break, lights all up 
+          green =20;
+          red = 20;
+          blue =20;
+     }
+
+
+     
+   
+   
+   //Input Level Debug Aid
+   Serial.println(brightness);  // <-------these are helpfull for seeing what values you are getting from and sending to your Leds
+   //Serial.println(max);       // <------- you can uncomment them and watch your out puts in the serial monior,
+   //Serial.println (average);    // <------- the serial plotter is more usefull when looking at audio valuse. just use one at a time.
+     
+          
+    
+  while (Pixel_Count < Num_Leds){ // <---------- used to build the string of data to the LEDs
+         //blue = 0; // <------------------------ used to build the string of data to the LEDs
+         //green = 0; // <----------------------- used to build the string of data to the LEDs
+         //red = (brightness); // <--------------- used to build the string of data to the LEDs
+      strip.setPixelColor(Pixel_Count, red, green, blue); // <--- used to build the string of data to the LEDs
+      Pixel_Count = (Pixel_Count + 1); // <----- used to build the string of data to the LEDs
+          
+         //Serial.println(Pixel_Num); // <-----  usefull for debuging the LED write Loop 
+         
+      }
+    count = 0;
+    strip.show();
+}  // <-------- End of File
